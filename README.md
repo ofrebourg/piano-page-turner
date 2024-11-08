@@ -1,5 +1,5 @@
 # piano-page-turner
-Node backend app connecting to a midi device, Vue frontend for displaying a PDF. Server-sent events notifying when to turn the page.
+Seamless music sheet viewing: a Node backend links to a MIDI-enabled piano, while a Vue frontend displays PDFs. Real-time page turns, synced via server-sent events.
 
 # Connect your midi device to your computer
 I personally connected my piano over bluetooth.
