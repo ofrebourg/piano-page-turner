@@ -10,14 +10,23 @@ type PdfSource = {
   offsetFirstPage?: boolean // start on the right side instead of the left if true
 }
 
-const pdfSources: PdfSource[] = [
-  { file: 'assets/maple-leaf-rag.pdf', title: 'Maple Leaf Rag' },
-  {
-    file: 'assets/variations-on-Kanon.pdf',
-    title: 'Kanon',
-    offsetFirstPage: true,
-  },
-]
+// Dynamically import all PDF files from the assets folder
+const pdfFiles = import.meta.glob('/assets/*.pdf', { eager: true })
+
+// Generate the pdfSources array from the imported files
+const pdfSources: PdfSource[] = Object.keys(pdfFiles).map((filePath) => {
+  const fileName = filePath.split('/').pop()?.replace('.pdf', '') || 'Unknown'
+  function transformTitle(title: string): string {
+    return title
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' '); // Split by '-', capitalize each word, and join with a space
+  } 
+  return {
+    file: filePath.replace('/src/', ''), // Adjust path for usage
+    title: transformTitle(fileName)
+  }
+})
 
 const defaultSelectionIndex = 1
 
@@ -55,17 +64,22 @@ onMounted(() => {
   })
 })
 
+// Remove the reload calls as they are not supported
 onresize = () => {
   if (!!pdfPage1.value) {
+    console.log('Reloading pdfPage1')
     pdfPage1.value.reload()
   }
   if (!!pdfPage2.value) {
+    console.log('Reloading pdfPage2')
     pdfPage2.value.reload()
   }
 }
 
-function onChange(event) {
-  const index = event.target.value
+// Parse the index as a number to fix type issues
+function onChange(event: Event) {
+  const target = event.target as HTMLSelectElement
+  const index = parseInt(target.value, 10) // Ensure index is a number
   pdfSource.value = pdfSources[index].file
   page.value = 1
   skipFirstPage.value = pdfSources[index].offsetFirstPage || false
